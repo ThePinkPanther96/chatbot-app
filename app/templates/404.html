@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Not Found</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            font-family: 'Arial', sans-serif;
+            color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .container {
+            text-align: center;
+        }
+        h1 {
+            font-size: 10em;
+            margin: 0;
+            animation: pop 1.2s ease-out;
+            position: relative;
+            top: 20px;
+        }
+        @keyframes pop {
+            0% { transform: scale(0.1); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            animation: slideIn 1.5s ease;
+        }
+        @keyframes slideIn {
+            0% { opacity: 0; transform: translateY(-50px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        p {
+            font-size: 1.2em;
+            animation: fadeIn 2s;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .home-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 30px;
+            color: #2575fc;
+            background-color: #f0f0f0;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .home-button:hover {
+            background-color: #2575fc;
+            color: #fff;
+            transform: translateY(-5px);
+        }
+        .funny-character {
+            position: absolute;
+            bottom: 72%;
+            left: 45.5%;
+            width: 150px;
+            height: 200px;
+            background: url('https://media1.tenor.com/m/KOZLvzU0o4kAAAAC/no-results.gif') no-repeat center center;
+            background-size: contain;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>404</h1>
+        <h2>Page Not Found</h2>
+        <p>Oops! The page you are looking for doesn't exist.<br>But no worries, we'll help you find your way back.</p>
+        <a href="/" class="home-button">Go Home</a>
+    </div>
+    <div class="funny-character"></div>
+</body>
+</html>

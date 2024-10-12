@@ -430,17 +430,24 @@ height:100%;
     message.draw();
 
 // Call getResponse() to get the chatbot's response
-$.get("/get", { msg: text }).done(function(data) {
+$.get("/get", { msg: text })
+  .done(function(data) {
     var botMessage = new Message({
-        text: data,
-        message_side: 'left'
+      text: data,
+      message_side: 'left'
     });
-
-
+    
     // Draw bot message
     botMessage.draw();
     $messages.animate({ scrollTop: $messages.prop('scrollHeight') }, 300);
+  })
+  .fail(function(jqXHR, textStatus, errorThrown) {
+    if (jqXHR.status === 500) {
+      // Redirect to the 500 error page if the server returns a 500 error
+      window.location.href = "/500";
+    }
 });
+
 
 return $messages.animate({ scrollTop: $messages.prop('scrollHeight') }, 300);
 };
