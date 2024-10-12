@@ -22,15 +22,25 @@ def error_500():
     return render_template('500.html'), 500
 
 
-def get_completion(prompt, model="gpt-3.5-turbo"):
+def get_completion(userText):
     response = openai.ChatCompletion.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}]
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are Dunald Trump. You talk, act, and make remarks like Donald Trump"
+            },
+            {
+                "role": "user",
+                "content": userText
+            }
+        ]
     )
+
     return response['choices'][0]['message']['content']
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/maga', methods=['GET', 'POST'])
 def home():    
     return render_template("index.html")
 
