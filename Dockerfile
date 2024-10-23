@@ -1,11 +1,10 @@
 FROM python:3
 
-MAINTAINER Gal
+LABEL maintainer="Gal"
 
 WORKDIR /app
 
 COPY app/ /app/
-
 COPY app/requirements.txt /app/
 
 RUN pip install --upgrade pip && pip install --no-cache-dir -r /app/requirements.txt
@@ -16,6 +15,7 @@ ARG BUILD_NUMBER
 ARG OPENAI_API_KEY
 
 ENV ENVIRONMENT=DEV
-ENV OPENAI_API_KEY=${OPENAI_API_KEY}
 
-ENTRYPOINT ["python", "magabot.py"]
+RUN echo "${OPENAI_API_KEY}" > /app/.openai_key
+
+ENTRYPOINT ["sh", "-c", "export OPENAI_API_KEY=$(cat /app/.openai_key) && python magabot.py"]
