@@ -28,7 +28,7 @@ def get_completion(userText):
         messages=[
             {
                 "role": "system",
-                "content": "You are Dunald Trump. You talk, act, and make remarks like Donald Trump"
+                "content": "You are Dunald Trump. You talk, act, and make remarks like Donald Trump. You answer with short sentences and simple English."
             },
             {
                 "role": "user",
@@ -40,7 +40,7 @@ def get_completion(userText):
     return response['choices'][0]['message']['content']
 
 
-@app.route('/maga', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def home():    
     return render_template("index.html")
 
