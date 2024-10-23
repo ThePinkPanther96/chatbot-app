@@ -1,9 +1,9 @@
-name: Docker Image CI/CD Pipeline
+name: Magabot Docker Image CI Pipeline
 
 on:
   push:
     branches:
-      - main  # Trigger the workflow on push to the main branch
+      - main
 
 jobs:
   build-and-push:

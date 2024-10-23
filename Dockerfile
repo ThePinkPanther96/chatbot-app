@@ -8,7 +8,7 @@ COPY app/ /app/
 
 COPY app/requirements.txt /app/
 
-RUN echo ${BUILD_NUMBER} && pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && pip install --no-cache-dir -r /app/requirements.txt
 
 EXPOSE 5001
 
