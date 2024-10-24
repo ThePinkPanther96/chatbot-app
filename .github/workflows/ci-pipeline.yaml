@@ -47,6 +47,8 @@ jobs:
 
       - name: Run the container with secrets
         run: |
+          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_REPO }}:${{ env.VERSION }}
+          echo "Running container from image: $IMAGE"
           docker run -d -p 5001:5001 \
             --env OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_REPO }}:${{ env.VERSION }}
+            $IMAGE
