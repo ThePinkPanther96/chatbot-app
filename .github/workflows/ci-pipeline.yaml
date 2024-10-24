@@ -1,4 +1,4 @@
-name: Magabot Docker Image CI Pipeline
+name: Docker Image CI/CD Pipeline
 
 on:
   push:
@@ -20,11 +20,6 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "DOCKER_REPO=$DOCKER_REPO" >> $GITHUB_ENV
 
-      - name: Debug Variables
-        run: |
-          echo "DOCKER_REPO=${{ env.DOCKER_REPO }}"
-          echo "VERSION=${{ env.VERSION }}"
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -44,11 +39,3 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_REPO }}:latest
           build-args: |
             OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-
-      - name: Run the container with secrets
-        run: |
-          IMAGE=${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_REPO }}:${{ env.VERSION }}
-          echo "Running container from image: $IMAGE"
-          docker run -d -p 5001:5001 \
-            --env OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-            $IMAGE
