@@ -1,11 +1,8 @@
 from flask import Flask, render_template, request, abort
 import openai
 import os
-from dotenv import load_dotenv
 
 app = Flask(__name__)
-
-load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
