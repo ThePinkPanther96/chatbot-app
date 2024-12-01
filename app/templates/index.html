@@ -43,7 +43,7 @@
 
 body {
   background-color: #797979;
-  background-image: url("{{ url_for('static', filename='background.png') }}");
+  background-image: url("{{ url_for('static', filename='background.webp') }}");
   background-size: contain; /* Ensures the whole image is visible */
   background-repeat: no-repeat; /* Prevents repeating the image */
   background-position: center; /* Centers the image */
@@ -64,14 +64,14 @@ body {
   top: 50%;
   transform: translateX(-50%) translateY(-50%);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-  background-color: #ebeaea;
+  background-color: rgba(217, 217, 217, 0.8);
   overflow: hidden;
 }
 
 
 
 .top_menu {
-  background-color: #ffffff;
+  background-color: rgba(230, 230, 230, 0.5);
   width: 100%;
   padding: 20px 0 15px;
   box-shadow: 0 1px 30px rgba(0, 0, 0, 0.1);
@@ -123,15 +123,15 @@ body {
   float: left;
 }
 .messages .message.left .text_wrapper {
-  background-color: #c4e793;
+  background-color: #da3636;
   margin-left: 20px;
 }
 .messages .message.left .text_wrapper::after, .messages .message.left .text_wrapper::before {
   right: 100%;
-  border-right-color: #c4e793;
+  border-right-color: #da3636;
 }
 .messages .message.left .text {
-  color: #3f9e4a;
+  color: #ffffff;
 }
 .messages .message.left .avatar {
   float: left;
@@ -144,16 +144,16 @@ body {
 }
 
 .messages .message.right .text_wrapper {
-  background-color: #c7eafc;
+  background-color: #367ada;
   margin-right: 20px;
   float: right;
 }
 .messages .message.right .text_wrapper::after, .messages .message.right .text_wrapper::before {
   left: 100%;
-  border-left-color: #c7eafc;
+  border-left-color: #367ada;
 }
 .messages .message.right .text {
-  color: #45829b;
+  color: #ffffff;
 }
 .messages .message.appeared {
   opacity: 1;
@@ -197,7 +197,7 @@ body {
 .bottom_wrapper {
   position: relative;
   width: 100%;
-  background-color: #ffffff;
+  background-color: rgba(230, 230, 230, 0.5);
   padding: 20px 20px;
   position: absolute;
   bottom: 0;
@@ -206,7 +206,7 @@ body {
   display: inline-block;
   height: 50px;
   border-radius: 25px;
-  border: 1px solid #bcbdc0;
+  border: 1px solid #c0bcbc;
   width: calc(100% - 160px);
   position: relative;
   padding: 0 20px;
@@ -368,7 +368,7 @@ height:100%;
 <div id="container">
 <div id="cont">
 <div class="footer_center">
-	   <h3>ChatBot Project. 2024 &#169; <a href="https://github.com/ThePinkPanther96/chatbot-app">Gal Rozman</a>   </h3>
+	   <h3>MAGABot Project. 2024 &#169; <a href="https://github.com/ThePinkPanther96/chatbot-app">Gal Rozman</a>   </h3>
 </div>
 </div>
 </div>
