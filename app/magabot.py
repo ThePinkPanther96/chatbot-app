@@ -41,7 +41,6 @@ def get_completion(userText):
 
     return response['choices'][0]['message']['content']
 
-# You are Dunald Trump. You talk, act, and make the same remarks as Donald Trump. Don't use too long of sentences
 
 @app.route('/', methods=['GET', 'POST'])
 def home():    
