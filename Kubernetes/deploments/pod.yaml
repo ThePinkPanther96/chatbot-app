@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: magabot
+  labels:
+    app.kubernetes.io/name: magabot-pod
+spec:
+  containers:
+  - name: magabot-container
+    image: thepinkpanther96/chatbot-app:latest
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 5001
