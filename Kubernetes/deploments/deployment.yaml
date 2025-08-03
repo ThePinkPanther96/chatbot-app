@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: magabot
+  labels:
+    app: magabot-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: magabot-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: magabot-app
+    spec:
+      containers:
+        - name: magabot-container
+          image: thepinkpanther96/chatbot-app:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 5001
+          resources:
+            limits:
+              cpu: "20m"
+              memory: "55Mi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 90
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+          env:
+            - name: ENVVARNAME
+              value: "ENVVARVALUE"
+      restartPolicy: Always
