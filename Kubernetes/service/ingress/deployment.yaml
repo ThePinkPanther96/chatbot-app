@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: magabot
+  name: magabot-deploy
   labels:
     app: magabot-app
 spec:
@@ -24,12 +24,12 @@ spec:
           image: thepinkpanther96/chatbot-app:latest
           imagePullPolicy: Always
           ports:
-            - name: http
+            - name: httpd:2.4
               containerPort: 5001
           resources:
             limits:
-              cpu: "100m"
-              memory: "256Mi"
+              cpu: "500m"
+              memory: "500Mi"
           
           startupProbe:
             httpGet: { path: /, port: http }
