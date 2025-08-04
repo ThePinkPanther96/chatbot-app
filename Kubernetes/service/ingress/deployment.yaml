@@ -24,12 +24,12 @@ spec:
           image: thepinkpanther96/chatbot-app:latest
           imagePullPolicy: Always
           ports:
-            - name: httpd:2.4
+            - name: http
               containerPort: 5001
           resources:
             limits:
-              cpu: "500m"
-              memory: "500Mi"
+              cpu: "100m"
+              memory: "128Mi"
           
           startupProbe:
             httpGet: { path: /, port: http }
@@ -38,7 +38,7 @@ spec:
 
           livenessProbe:
             httpGet:
-              path: /liveness
+              path: /
               port: http
             initialDelaySeconds: 15
             timeoutSeconds: 10
@@ -48,7 +48,7 @@ spec:
           
           readinessProbe:
             httpGet:
-              path: /readiness
+              path: /
               port: http
             initialDelaySeconds: 15
             timeoutSeconds: 10

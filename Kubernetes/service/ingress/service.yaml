@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name:  Service Name
+  name:  websvc
 spec:
   selector:
     app: magabot-app
