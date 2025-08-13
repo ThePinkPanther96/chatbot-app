@@ -1,0 +1,38 @@
+apiVersion: eksctl.io/v1alpha5       # Defines the API version used by eksctl for parsing this config
+kind: ClusterConfig                  # Declares the type of resource (an EKS cluster configuration)
+
+metadata:
+  name: magabot-ingress             # Name of the EKS cluster to be created
+  region: eu-central-1              # AWS region where the cluster will be deployed (Ohio)
+  tags:                             # Custom tags for AWS resources created as part of this cluster
+    owner: gal-r                    # Tag indicating the owner of the cluster
+    bu: magabot                     # Tag indicating business unit or project group
+    project: magabot-ingress        # Tag for grouping resources under the ingress demo project
+
+availabilityZones:
+  - eu-central-1a                   # First availability zone for high availability
+  - eu-central-1b                   # Second availability zone to span the cluster
+
+iam:
+  withOIDC: true                    # Enables IAM OIDC provider, required for IAM roles for service accounts (IRSA)
+
+managedNodeGroups:
+  - name: magabot-eks-priv-ng       # Name of the managed node group
+    instanceType: t3.small          # EC2 instance type for worker nodes
+    minSize: 2                      # Minimum number of nodes in the group
+    maxSize: 4                      # Maximum number of nodes (fixed at 4 here; no autoscaling)
+    privateNetworking: true         # Launch nodes in **private subnets only** (no public IPs)
+    volumeSize: 20                  # Size (in GB) of EBS volume attached to each node
+    iam:
+      withAddonPolicies:           # Enables AWS-managed IAM policies for certain addons
+        autoScaler: true           # Allows Cluster Autoscaler to manage this node group
+        externalDNS: false         # Disables permissions for ExternalDNS (not used in this demo)
+        certManager: yes           # Grants cert-manager access to manage certificates using IAM
+        ebs: false                 # Disables EBS volume policy (not required here)
+        fsx: false                 # Disables FSx access
+        efs: false                 # Disables EFS access
+        albIngress: true           # Grants permissions needed by AWS Load Balancer Controller (ALB)
+        xRay: false                # Disables AWS X-Ray (tracing not needed)
+        cloudWatch: false          # Disables CloudWatch logging from nodes (optional in minimal setups)
+    labels:
+      lifecycle: ec2-autoscaler     # Custom label applied to all nodes in this group (useful for targeting in node selectors or autoscaler configs)

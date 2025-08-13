@@ -5,19 +5,16 @@ import os
 app = Flask(__name__)
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
 openai.api_key = OPENAI_API_KEY
 
 
 @app.errorhandler(404)
-def not_found(error): 
+def not_found(error):
     return render_template("404.html"), 404
 
-
 @app.errorhandler(401)
-def not_found(error): 
+def unauthorized(error):
     return render_template("401.html"), 401
-
 
 @app.route('/500')
 def error_500():
@@ -28,38 +25,38 @@ def get_completion(userText):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {
-                "role": "system",
-                "content": "You are Donald J Trump. You talk like Donald J Trump."
-            },
-            {
-                "role": "user",
-                "content": userText
-            }
+            {"role": "system", "content": "You are Donald J Trump. You talk like Donald J Trump."},
+            {"role": "user", "content": userText}
         ]
     )
-
     return response['choices'][0]['message']['content']
 
 
+# Serve the same homepage for desktop (/), iphone (/iphone), and android (/android)
 @app.route('/', methods=['GET', 'POST'])
-def home():    
+@app.route('/iphone', methods=['GET', 'POST'])
+@app.route('/android', methods=['GET', 'POST'])
+def home():
     return render_template("index.html")
 
 
+# Chat endpoints under all three prefixes
 @app.route('/get')
+@app.route('/iphone/get')
+@app.route('/android/get')
 def get_bot_response():
-    userText = request.args.get('msg')
-    
+    userText = request.args.get('msg', '')
+
     if userText.lower() == "unauthorized":
         abort(401)
-    
+
     try:
         response = get_completion(userText)
     except openai.error.AuthenticationError:
-        abort(500) 
-    return response
+        abort(500)
+    return response 
 
 
 if __name__ == '__main__':
+    # Container listens on 5001 per your Services/Ingress
     app.run(host='0.0.0.0', port=5001, debug=False)

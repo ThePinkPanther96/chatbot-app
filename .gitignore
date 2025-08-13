@@ -9,6 +9,9 @@ Thumbs.db
 # C extensions
 *.so
 
+# AWS credentials (secrets)
+EKScreds.txt
+
 # Distribution / packaging
 .Python
 build/
