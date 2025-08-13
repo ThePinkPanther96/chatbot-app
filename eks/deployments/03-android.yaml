@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: android-deploy
+  namespace: magabot-ns
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: android-page
+  template:
+    metadata:
+      labels:
+        app: android-page
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: android-page
+      containers:
+      - name: chatbot-app
+        image: thepinkpanther96/chatbot-app:latest
+        ports:
+        - containerPort: 5001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: android-svc
+  namespace: magabot-ns
+  annotations:
+    alb.ingress.kubernetes.io/healthcheck-path: /
+spec:
+  selector:
+    app: android-page
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5001
