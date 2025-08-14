@@ -1,3 +1,2 @@
-os
 pytest
 pytest-flask
