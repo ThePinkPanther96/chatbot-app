@@ -1,8 +1,8 @@
-name: Docker Image CI/CD Pipeline
+name: Docker Image CI
 
 on:
   workflow_run:
-    workflows: [ "App Tests" ]     # must match the 'name' above exactly
+    workflows: [ "Run Pytest" ]
     types: [ completed ]
 
 jobs:
@@ -44,4 +44,3 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_REPO }}:${{ env.VERSION }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_REPO }}:latest
-          # No build-args here; the app reads OPENAI_API_KEY at runtime in Kubernetes
