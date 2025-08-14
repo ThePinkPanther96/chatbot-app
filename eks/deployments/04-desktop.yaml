@@ -25,6 +25,12 @@ spec:
         image: thepinkpanther96/chatbot-app:latest
         ports:
         - containerPort: 5001
+        env:                     
+        - name: OPENAI_API_KEY   
+          valueFrom:             
+            secretKeyRef:        
+              name: openai        
+              key: OPENAI_API_KEY
 ---
 apiVersion: v1
 kind: Service
