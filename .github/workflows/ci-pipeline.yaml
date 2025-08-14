@@ -8,11 +8,6 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    env:
-      AWS_REGION: eu-central-1
-      EKS_CLUSTER: magabot-ingress
-      K8S_NAMESPACE: magabot-ns
-      DEPLOYS: "iphone-deploy android-deploy desktop-deploy"
 
     steps:
       - name: Checkout code
@@ -42,37 +37,3 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_REPO }}:${{ env.VERSION }}
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_REPO }}:latest
-          # No need to pass the OPENAI_API_KEY as a build-arg. The key is injected at runtime in K8s.
-          # build-args:
-          #   OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-
-      # --- Deploy-time steps ---
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region:            ${{ env.AWS_REGION }}
-
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: v1.32.0
-
-      - name: Build kubeconfig for EKS
-        run: aws eks update-kubeconfig --region "${AWS_REGION}" --name "${EKS_CLUSTER}"
-
-      - name: Create/Update OPENAI secret in cluster (from GitHub Secret)
-        run: |
-          kubectl -n "${K8S_NAMESPACE}" create secret generic openai \
-            --from-literal=OPENAI_API_KEY='${{ secrets.OPENAI_API_KEY }}' \
-            --dry-run=client -o yaml | kubectl apply -f -
-
-      # Optional but handy: roll the deployments so pods pick up any new image and env immediately
-      - name: Restart deployments
-        run: |
-          for d in $DEPLOYS; do
-            kubectl -n "${K8S_NAMESPACE}" rollout restart deploy/$d
-            kubectl -n "${K8S_NAMESPACE}" rollout status deploy/$d
-          done
