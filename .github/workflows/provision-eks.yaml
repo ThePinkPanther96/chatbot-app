@@ -47,7 +47,7 @@ jobs:
           curl -L -o kubectl "https://dl.k8s.io/release/${KVER}/bin/linux/amd64/kubectl"
           sudo install -m 0755 kubectl /usr/local/bin/kubectl
           rm kubectl
-          kubectl version --client --short
+          kubectl version --client=true     # <-- change from --short
       
           # helm
           curl -sSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
