@@ -1,13 +1,9 @@
 # tests/test_app.py
 import os
 import pytest
-
-# Import the Flask app
-# If your file is app/magabot.py and defines `app = Flask(__name__)`:
-from app.magabot import app as flask_app
-
 import openai
 from openai.error import AuthenticationError
+from app.magabot import app as flask_app
 
 
 @pytest.fixture()

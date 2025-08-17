@@ -1,0 +1,135 @@
+name: Provision/Update EKS & Workloads
+
+on:
+  workflow_dispatch:
+    inputs:
+      do_rollout:
+        description: "Rollout restart app Deployments after apply"
+        required: false
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    env:
+      CLUSTER_NAME: magabot-ingress
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      K8S_NAMESPACE: magabot-ns
+      POLICY_NAME: AWSLoadBalancerControllerIAMPolicy
+      SA_NAME: aws-load-balancer-controller
+      SA_NAMESPACE: kube-system              # keep controller in kube-system
+      DEPLOYS: "iphone-deploy android-deploy desktop-deploy"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ env.AWS_REGION }}
+
+      - name: Install tooling (eksctl, kubectl, helm)
+        run: |
+          curl -sSL https://git.io/get_eksctl | bash
+          echo "kubectl: $(curl -sSL -o /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -sSL https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x /usr/local/bin/kubectl && kubectl version --client --short)"
+          curl -sSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          helm version --short
+
+      # --- Cluster (create if missing) ---
+      - name: Ensure cluster exists (create if absent)
+        id: ensure-cluster
+        shell: bash
+        run: |
+          if aws eks describe-cluster --name "$CLUSTER_NAME" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Cluster already exists."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Creating cluster from eks/eks-config.yaml ..."
+            eksctl create cluster -f eks/eks-config.yaml
+          fi
+
+      - name: Build kubeconfig for EKS
+        run: aws eks update-kubeconfig --region "$AWS_REGION" --name "$CLUSTER_NAME"
+
+      # --- ALB Controller IAM policy (create if missing) ---
+      - name: Ensure ALB Controller IAM policy exists
+        id: ensure-policy
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          POLICY_ARN="arn:aws:iam::$ACCOUNT_ID:policy/${POLICY_NAME}"
+          if aws iam get-policy --policy-arn "$POLICY_ARN" >/dev/null 2>&1; then
+            echo "policy_arn=$POLICY_ARN" >> $GITHUB_OUTPUT
+            echo "IAM policy exists: $POLICY_ARN"
+          else
+            echo "Creating IAM policy $POLICY_NAME ..."
+            aws iam create-policy \
+              --policy-name "$POLICY_NAME" \
+              --policy-document file://iam/iam_policy.json >/dev/null
+            echo "policy_arn=$POLICY_ARN" >> $GITHUB_OUTPUT
+            echo "Created: $POLICY_ARN"
+          fi
+
+      # --- IRSA service account for ALB controller (idempotent) ---
+      - name: Ensure IRSA service account for ALB Controller
+        run: |
+          eksctl create iamserviceaccount \
+            --cluster="$CLUSTER_NAME" \
+            --namespace="$SA_NAMESPACE" \
+            --name="$SA_NAME" \
+            --attach-policy-arn="${{ steps.ensure-policy.outputs.policy_arn }}" \
+            --override-existing-serviceaccounts \
+            --region="$AWS_REGION" \
+            --approve
+
+      # --- Install/upgrade AWS Load Balancer Controller ---
+      - name: Install/Upgrade AWS Load Balancer Controller via Helm
+        run: |
+          helm repo add eks https://aws.github.io/eks-charts
+          helm repo update
+          helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
+            -n "$SA_NAMESPACE" \
+            --set clusterName="$CLUSTER_NAME" \
+            --set serviceAccount.create=false \
+            --set serviceAccount.name="$SA_NAME" \
+            --version 1.13.0
+          kubectl -n "$SA_NAMESPACE" rollout status deploy/aws-load-balancer-controller
+
+      # --- App namespace & secret ---
+      - name: Create/ensure application namespace
+        run: kubectl apply -f eks/deployments/01-ns.yaml
+
+      - name: Create/Update OPENAI secret from Actions secret
+        run: |
+          kubectl -n "$K8S_NAMESPACE" create secret generic openai \
+            --from-literal=OPENAI_API_KEY='${{ secrets.OPENAI_API_KEY }}' \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      # --- App workloads & ingress ---
+      - name: Apply workloads (Deployments/Services/Ingress)
+        run: |
+          kubectl apply -f eks/deployments/02-iphone.yaml
+          kubectl apply -f eks/deployments/03-android.yaml
+          kubectl apply -f eks/deployments/04-desktop.yaml
+          kubectl apply -f eks/deployments/05-ingress.yaml
+
+      - name: Optional rollout restart to pull latest image
+        if: ${{ github.event.inputs.do_rollout == 'true' }}
+        run: |
+          kubectl -n "$K8S_NAMESPACE" rollout restart deploy/iphone-deploy deploy/android-deploy deploy/desktop-deploy
+          kubectl -n "$K8S_NAMESPACE" rollout status  deploy/iphone-deploy
+          kubectl -n "$K8S_NAMESPACE" rollout status  deploy/android-deploy
+          kubectl -n "$K8S_NAMESPACE" rollout status  deploy/desktop-deploy
+
+      - name: Show ALB address
+        run: |
+          echo "Ingress:"
+          kubectl -n "$K8S_NAMESPACE" get ingress magabot-ingress -o wide
+          echo
+          echo "ALB DNS:"
+          kubectl -n "$K8S_NAMESPACE" get ingress magabot-ingress -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'; echo
