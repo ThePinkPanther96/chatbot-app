@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -30,8 +32,24 @@ jobs:
 
       - name: Install tooling (eksctl, kubectl, helm)
         run: |
-          curl -sSL https://git.io/get_eksctl | bash
-          echo "kubectl: $(curl -sSL -o /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -sSL https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x /usr/local/bin/kubectl && kubectl version --client --short)"
+          # eksctl (latest release)
+          OS=$(uname -s)
+          ARCH=$(uname -m)
+          [ "$OS" = "Linux" ] && OS=Linux
+          [ "$ARCH" = "x86_64" ] && ARCH=amd64
+          [ "$ARCH" = "aarch64" ] && ARCH=arm64
+          curl -sSL "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_${OS}_${ARCH}.tar.gz" \
+            | sudo tar xz -C /usr/local/bin
+          eksctl version
+      
+          # kubectl (stable)
+          KVER=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+          curl -L -o kubectl "https://dl.k8s.io/release/${KVER}/bin/linux/amd64/kubectl"
+          sudo install -m 0755 kubectl /usr/local/bin/kubectl
+          rm kubectl
+          kubectl version --client --short
+      
+          # helm
           curl -sSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
           helm version --short
 
