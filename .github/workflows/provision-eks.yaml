@@ -1,14 +1,9 @@
 name: Provision/Update EKS & Workloads
 
 on:
-  workflow_dispatch:
-    inputs:
-      do_rollout:
-        description: "Rollout restart app Deployments after apply"
-        required: false
-        default: "true"
-        type: choice
-        options: ["true", "false"]
+  workflow_run:
+    workflows: [ "Docker Image CI" ] 
+    types: [ completed ]
 
 jobs:
   provision:
