@@ -1,0 +1,28 @@
+datadog:
+  site: datadoghq.com
+
+  # Use Kubernetes secrets
+  apiKeyExistingSecret: datadog-api-key
+  appKeyExistingSecret: datadog-app-key 
+
+  clusterName: magabot-ingress
+  tags:
+    - env:prod
+    - cluster:magabot-ingress
+
+  logs:
+    enabled: true
+    containerCollectAll: true
+
+  apm:
+    enabled: true
+
+  processAgent:
+    enabled: true
+
+  kubeStateMetricsCore:
+    enabled: true
+
+agents:
+  image:
+    tag: latest
